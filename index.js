@@ -1,17 +1,72 @@
-const prompt = require("prompt-sync")({ sigint: true });
+// const prompt = require("prompt-sync")({ sigint: true });
 
-// TODO: Game elements/assets constants
-// TODO: UP / DOWN / LEFT / RIGHT / QUIT keyboard constants
-// TODO: MSG_UP / MSG_DOWN / MSG_LEFT / MSG_RIGHT / MSG_ QUIT / MSG_INVALID message constants
-// TODO: WIN / LOSE / OUT / QUIT messages constants
-// TODO: MAP ROWS, COLUMNS AND PERCENTAGE
+import promptSync from "prompt-sync";
+const prompt = promptSync({ sigint: true });
+
+
+// * Game elements/assets 
+const HAT = "^";
+const HOLE = "O";
+const GRASS = "░";
+const PLAYER = "*";
+
+// * UP / DOWN / LEFT / RIGHT / QUIT (DEFAULT) keyboard constants
+const UP = "w";
+const DOWN = "s";
+const LEFT = "a";
+const RIGHT = "d";
+const QUIT = "q";
+
+// * MSG_UP / MSG_DOWN / MSG_LEFT / MSG_RIGHT / MSG_ QUIT / MSG_INVALID message constants
+const FEEDBACK_UP = "You moved up.";
+const FEEDBACK_DOWN = "You moved down.";
+const FEEDBACK_LEFT = "You moved left.";
+const FEEDBACK_RIGHT = "You moved right.";
+const FEEDBACK_QUIT = "You quit the game.";
+const FEEDBACK_INVALID = "Invalid entry! Please enter w (up), s (down), a (left), d (right) or q (quit) .";
+
+// * WIN / LOSE / OUT / QUIT messages constants
+const FEEDBACK_WIN_MSG = "Congratulations, You won!";
+const FEEDBACK_LOSE_MSG = "You fell into a hole! Game over.";
+const FEEDBACK_OUT_MSG = "You stepped out of the platform! Game over.";
+const FEEDBACK_QUIT_GAME_MSG = "You quit the game. Thanks for playing.";
+
+// * MAP ROWS, COLUMNS AND PERCENTAGE
+const ROWS = 10;
+const COLS = 5;
+const PERCENT = 0.2;  // Percentage of holes in the field
 
 class Field {
-  // TODO: constructor, a built-in method of a class (invoked when an object of a class is instantiated)
 
-  // TODO: generateField is a static method, returning a 2D array of the fields
+  
+  // * constructor, a built-in method of a class (invoked when an object of a class is instantiated)
+  constructor(field = [[]]) {
+    this.field = field;
+    this.gamePlay = false;
+  }
+
+  // * generateField is a static method, returning a 2D array of the fields
+  static generateField(rows, cols, percentage) {
+    const map = [];
+    for (let i = 0; i < rows; i++) {
+      map[i] = [];
+      for (let j = 0; j < cols; j++) {
+        map[i][j] = Math.random() < percentage ? HOLE : GRASS;
+      }
+    }
+    return map;
+  }
 
   // TODO: welcomeMessage is a static method, displays a string
+  static welcomeMessage(msg) {
+    if (msg === undefined) {
+      console.log("\n\n***************************************");
+      console.log("Welcome to Find My Hat!\n\nYour goal is to find the hat (^) without falling into any holes (O) or stepping out of the field.\n\nUse w (up), s (down), a (left), d (right) to move.\n\nGood luck!!!!!");
+      console.log("***************************************\n\n");
+    } else {
+      console.log(msg);
+    }
+  }
 
   // TODO: setHat positions the hat along a random x and y position within field array
 
@@ -22,12 +77,63 @@ class Field {
   // !! TODO: updateGame Assessment Challenge
 
   //  TODO: start() a public method of the class to start the game
+  start() {
+    this.gamePlay = true;
+
+    while (this.gamePlay) {
+      const move = prompt("Enter (w)up, (s)down, (a)left, (d)right. Press (q) to quit: ");
+      
+      switch (move.toLowerCase()) {
+        case UP:
+          console.log(FEEDBACK_UP);
+          break;
+        case DOWN:
+          console.log(FEEDBACK_DOWN);
+          break;
+        case LEFT:
+          console.log(FEEDBACK_LEFT);
+          break;
+        case RIGHT:
+          console.log(FEEDBACK_RIGHT);
+          break;
+        case QUIT:
+          console.log(FEEDBACK_QUIT);
+          this.#end();
+          break;
+        default:
+          console.log(FEEDBACK_INVALID);
+          break;
+      }
+
+    }
+
+  }
+
+  #end() {
+    this.gamePlay = false;
+  }
 }
 
-// TODO: Generate a new field - using Field's static method: generateField
 
-// TODO: Generate aa welcome message
+// * Generate a new field - using Field's static method: generateField
+const createField = Field.generateField(ROWS, COLS, PERCENT);
 
-// TODO: Create a new instance of the game
+
+// * Generate aa welcome message
+Field.welcomeMessage("\n*************** WELCOME TO FIND YOUR HAT! ***************\n");
+// console.log(Field.welcomeMessage()); // Custom welcome message is optional, if not provided, the default welcome message will be displayed
+
+
+// * Create a new instance of the game
+const gameField = new Field(createField);
+
 
 // TODO: Invoke method start(...) from the instance of game object
+gameField.start();
+
+
+
+console.log(createField.map(row => row.join("")).join("\n"));
+
+
+
