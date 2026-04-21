@@ -32,7 +32,7 @@ const FEEDBACK_OUT_MSG = "You stepped out of the platform! Game over.";
 const FEEDBACK_QUIT_GAME_MSG = "You quit the game. Thanks for playing.";
 
 // * MAP ROWS, COLUMNS AND PERCENTAGE
-const ROWS = 10;
+const ROWS = 8;
 const COLS = 5;
 const PERCENT = 0.2;  // Percentage of holes in the field
 
@@ -57,7 +57,7 @@ class Field {
     return map;
   }
 
-  // TODO: welcomeMessage is a static method, displays a string
+  // * welcomeMessage is a static method, displays a string
   static welcomeMessage(msg) {
     if (msg === undefined) {
       console.log("\n\n***************************************");
@@ -68,47 +68,105 @@ class Field {
     }
   }
 
-  // TODO: setHat positions the hat along a random x and y position within field array
+  // * setHat positions the hat along a random x and y position within field array
+  setHat(){
+    const x = Math.floor(Math.random() * (ROWS-1)) + 1;
+    const y = Math.floor(Math.random() * (COLS-1)) + 1;
+    this.field[x][y] = HAT;
+  }
 
-  // TODO: printField displays the updated status of the field position
+  // * printField displays the updated status of the field position
+  printField() {
+    this.field.forEach(row => console.log(row.join("")));
+  }
 
-  // TODO: updateMove displays the move (key) entered by the user
+  // * updateMove displays the move (key) entered by the user
+  updateMove(direction) {
+    console.log(direction);
+  }
 
   // !! TODO: updateGame Assessment Challenge
+  updateGame() {
+    
+    // check the following conditions:
+    // 1. if the player fell into a HOLE, end the game
+    // 2. if the player stepped out of the map, end the game
+    // 3. if the player found the HAT, wins the game
+    // 4. if the player moved to a GRASS spot, update the player's position and continue with the game
+    
+    if (this.field[this.playerX][this.playerY] === HOLE) {
+      console.log(FEEDBACK_LOSE_MSG);
+      this.#end();
+    } else if (this.field[this.playerX][this.playerY] === HAT) {
+      console.log(FEEDBACK_WIN_MSG);
+      this.#end();
+    } else if (this.field[this.playerX][this.playerY] === GRASS) {
+      this.field[this.playerX][this.playerY] = PLAYER;
+    } else {
+      console.log(FEEDBACK_OUT_MSG);
+      this.#end();
+    }
 
-  //  TODO: start() a public method of the class to start the game
+
+  }
+
+  //  * start() a public method of the class to start the game
   start() {
     this.gamePlay = true;
 
+    // set the players' position to the start of the map
+    this.field[0][0] = PLAYER;
+    this.playerX = 0;
+    this.playerY = 0;
+    this.setHat();
+
     while (this.gamePlay) {
+
+      // print the starting field
+      this.printField();
       const move = prompt("Enter (w)up, (s)down, (a)left, (d)right. Press (q) to quit: ");
+      let flagInvalid = false;
+      let feedback = "";
       
       switch (move.toLowerCase()) {
         case UP:
-          console.log(FEEDBACK_UP);
+          feedback = FEEDBACK_UP;
+          this.playerX -= 1;
           break;
         case DOWN:
-          console.log(FEEDBACK_DOWN);
+          feedback = FEEDBACK_DOWN;
+          this.playerX += 1;
           break;
         case LEFT:
-          console.log(FEEDBACK_LEFT);
+          feedback = FEEDBACK_LEFT;
+          this.playerY -= 1;
           break;
         case RIGHT:
-          console.log(FEEDBACK_RIGHT);
+          feedback = FEEDBACK_RIGHT;
+          this.playerY += 1;
           break;
         case QUIT:
-          console.log(FEEDBACK_QUIT);
+          feedback = FEEDBACK_QUIT;
           this.#end();
           break;
         default:
-          console.log(FEEDBACK_INVALID);
+          feedback = FEEDBACK_INVALID;
+          flagInvalid = true;
           break;
+      }
+
+      this.updateMove(feedback);
+
+      if (!flagInvalid) {
+        this.updateGame(move);
+
       }
 
     }
 
   }
 
+  // * Private method to stop the game. 
   #end() {
     this.gamePlay = false;
   }
@@ -128,12 +186,10 @@ Field.welcomeMessage("\n*************** WELCOME TO FIND YOUR HAT! **************
 const gameField = new Field(createField);
 
 
-// TODO: Invoke method start(...) from the instance of game object
+// * Invoke method start(...) from the instance of game object
 gameField.start();
 
 
-
-console.log(createField.map(row => row.join("")).join("\n"));
 
 
 
