@@ -1,4 +1,4 @@
-// const prompt = require("prompt-sync")({ sigint: true });
+// const prompt = require("prompt-sync")({ sigint: true }); // Old way of importing prompt-sync, using CommonJS syntax. This is not compatible with ES6 modules.
 
 import promptSync from "prompt-sync";
 const prompt = promptSync({ sigint: true });
@@ -86,15 +86,27 @@ class Field {
   }
 
   // !! TODO: updateGame Assessment Challenge
-  updateGame() {
+  updateGame(move) {
+
+    // Clear the player's previous position by setting it back to GRASS
+    this.field[this.playerX][this.playerY] = GRASS;
+
+    // Update the player's position based on the move
+    if (move === 'w') {
+      this.playerX -= 1;
+    } else if (move === 's') {
+      this.playerX += 1;
+    } else if (move === 'a') {
+      this.playerY -= 1;
+    } else if (move === 'd') {
+      this.playerY += 1;
+    }
     
-    // check the following conditions:
-    // 1. if the player fell into a HOLE, end the game
-    // 2. if the player stepped out of the map, end the game
-    // 3. if the player found the HAT, wins the game
-    // 4. if the player moved to a GRASS spot, update the player's position and continue with the game
-    
-    if (this.field[this.playerX][this.playerY] === HOLE) {
+    // Check the new position of the player and update the game state accordingly
+    if (this.playerX < 0 || this.playerX >= ROWS || this.playerY < 0 || this.playerY >= COLS) {
+      console.log(FEEDBACK_OUT_MSG);
+      this.#end();
+    } else if (this.field[this.playerX][this.playerY] === HOLE) {
       console.log(FEEDBACK_LOSE_MSG);
       this.#end();
     } else if (this.field[this.playerX][this.playerY] === HAT) {
@@ -103,15 +115,15 @@ class Field {
     } else if (this.field[this.playerX][this.playerY] === GRASS) {
       this.field[this.playerX][this.playerY] = PLAYER;
     } else {
-      console.log(FEEDBACK_OUT_MSG);
-      this.#end();
+      throw new Error("Unexpected field value!");
     }
-
 
   }
 
   //  * start() a public method of the class to start the game
   start() {
+
+    // initializes the game loop
     this.gamePlay = true;
 
     // set the players' position to the start of the map
@@ -124,26 +136,22 @@ class Field {
 
       // print the starting field
       this.printField();
-      const move = prompt("Enter (w)up, (s)down, (a)left, (d)right. Press (q) to quit: ");
+      const move = prompt("Enter (w)up, (s)down, (a)left, (d)right. Press (q) to quit: ").toLowerCase();
       let flagInvalid = false;
       let feedback = "";
       
       switch (move.toLowerCase()) {
         case UP:
           feedback = FEEDBACK_UP;
-          this.playerX -= 1;
           break;
         case DOWN:
           feedback = FEEDBACK_DOWN;
-          this.playerX += 1;
           break;
         case LEFT:
           feedback = FEEDBACK_LEFT;
-          this.playerY -= 1;
           break;
         case RIGHT:
           feedback = FEEDBACK_RIGHT;
-          this.playerY += 1;
           break;
         case QUIT:
           feedback = FEEDBACK_QUIT;
